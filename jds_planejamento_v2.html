@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Planejamento Estratégico 2025 · Grupo Jardim da Saudade</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --bg2: #161616;
+  --bg3: #1e1e1e;
+  --bg4: #262626;
+  --border: #2a2a2a;
+  --border2: #333;
+  --text: #e8e6e1;
+  --text2: #9a9690;
+  --text3: #5a5855;
+  --green: #2dd4a0;
+  --green-dim: #1a3d30;
+  --accent: #c9a96e;
+  --danger: #e05252;
+  --radius: 6px;
+  --radius-lg: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.5}
+
+/* ── LOGIN ── */
+#loginScreen{display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;gap:2rem}
+.login-logo{font-family:'DM Serif Display',serif;font-size:28px;color:var(--text);letter-spacing:-.5px;text-align:center}
+.login-logo span{color:var(--accent)}
+.login-box{background:var(--bg2);border:0.5px solid var(--border2);border-radius:var(--radius-lg);padding:2rem;width:320px;display:flex;flex-direction:column;gap:1rem}
+.login-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px}
+.login-input{width:100%;background:var(--bg3);border:0.5px solid var(--border2);border-radius:var(--radius);padding:10px 12px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:13px}
+.login-input:focus{outline:none;border-color:var(--green)}
+.login-btn{background:var(--green);color:#0a2018;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;border:none;border-radius:var(--radius);padding:10px;cursor:pointer;transition:opacity .15s}
+.login-btn:hover{opacity:.85}
+.login-err{font-size:12px;color:var(--danger);text-align:center;display:none}
+
+/* ── APP ── */
+#app{display:none;height:100vh;flex-direction:column}
+.topbar{height:44px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 1.25rem;flex-shrink:0}
+.topbar-brand{font-family:'DM Serif Display',serif;font-size:15px;color:var(--text);letter-spacing:-.3px}
+.topbar-brand span{color:var(--accent)}
+.topbar-right{display:flex;align-items:center;gap:.75rem}
+.topbar-path{font-size:11px;color:var(--text3)}
+.save-btn{font-size:11px;padding:5px 12px;border-radius:var(--radius);border:0.5px solid var(--green);color:var(--green);background:transparent;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.save-btn:hover{background:var(--green-dim)}
+.logout-btn{font-size:11px;color:var(--text3);cursor:pointer;background:none;border:none;font-family:'DM Sans',sans-serif}
+.logout-btn:hover{color:var(--text2)}
+
+/* ── 3-COL LAYOUT ── */
+.workspace{display:grid;grid-template-columns:196px 196px 1fr;flex:1;overflow:hidden}
+.col{display:flex;flex-direction:column;border-right:0.5px solid var(--border);overflow:hidden}
+.col:last-child{border-right:none}
+.col-hd{padding:.625rem .875rem;border-bottom:0.5px solid var(--border);font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;flex-shrink:0}
+.col-body{flex:1;overflow-y:auto;padding:.25rem 0}
+.col-body::-webkit-scrollbar{width:3px}
+.col-body::-webkit-scrollbar-track{background:transparent}
+.col-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+/* ── SIDEBAR ITEMS ── */
+.si{padding:7px 12px;font-size:12.5px;color:var(--text2);cursor:pointer;border-left:2px solid transparent;display:flex;justify-content:space-between;align-items:center;gap:4px;transition:all .1s;user-select:none}
+.si:hover{background:var(--bg2);color:var(--text)}
+.si.active{background:var(--bg2);color:var(--text);font-weight:500;border-left-color:var(--green)}
+.si .dot{width:5px;height:5px;border-radius:50%;background:var(--green);flex-shrink:0}
+.si .cnt{font-size:10px;color:var(--text3);background:var(--bg3);padding:1px 5px;border-radius:10px;border:0.5px solid var(--border)}
+
+/* ── PANEL ── */
+.panel{flex:1;overflow-y:auto;padding:1.25rem}
+.panel::-webkit-scrollbar{width:3px}
+.panel::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+
+.sub-grid{display:flex;flex-direction:column;gap:4px}
+.sub-card{padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border);background:var(--bg2);cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--text2);transition:all .12s}
+.sub-card:hover{border-color:var(--border2);color:var(--text)}
+.sub-card.active{border-color:var(--green);color:var(--text);background:var(--bg3)}
+.sub-card .dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+
+/* ── OKR ── */
+.okr-list{display:flex;flex-direction:column;gap:.75rem}
+.okr-card{border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;transition:border-color .15s}
+.okr-card:hover{border-color:var(--border2)}
+.okr-head{padding:.625rem .875rem;background:var(--bg2);border-bottom:0.5px solid var(--border);cursor:pointer;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.okr-badge{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px}
+.okr-obj{font-size:13px;font-weight:500;color:var(--text);line-height:1.4}
+
+.ed{font-size:inherit;color:inherit;font-weight:inherit;line-height:inherit;cursor:text;padding:2px 4px;border-radius:4px;border:0.5px solid transparent;font-family:inherit;background:transparent;width:100%;display:block}
+.ed:hover{border-color:var(--border2);background:var(--bg3)}
+.ed:focus{outline:none;border-color:var(--green);background:var(--bg3)}
+.ed.sm{font-size:11px;color:var(--text2)}
+.ed.sm:focus{color:var(--text)}
+
+.icon-btn{font-size:10px;padding:2px 6px;border-radius:4px;border:0.5px solid var(--border);background:transparent;color:var(--text3);cursor:pointer;transition:all .1s;flex-shrink:0}
+.icon-btn:hover{background:#3d1515;color:var(--danger);border-color:#5a2020}
+.chev{font-size:10px;color:var(--text3);padding:2px 5px;transition:transform .15s;flex-shrink:0}
+.chev.open{transform:rotate(180deg)}
+
+.kr-body{padding:.75rem .875rem;display:flex;flex-direction:column;gap:.875rem;background:var(--bg)}
+.kr-item{border-left:2px solid var(--border2);padding-left:.75rem}
+.kr-badge{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1px}
+
+.kr-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:5px;margin:.375rem 0}
+.kf-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:1px}
+
+.inds-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:.5rem 0 3px}
+.ind-row{display:grid;grid-template-columns:1fr 72px 18px;gap:4px;align-items:center;padding:2px 0;border-bottom:0.5px solid var(--border)}
+.ind-row:last-child{border:none}
+.ind-del{font-size:9px;color:var(--text3);cursor:pointer;text-align:center}
+.ind-del:hover{color:var(--danger)}
+.add-ind{font-size:10px;color:var(--text3);cursor:pointer;padding:3px 0;display:inline-block}
+.add-ind:hover{color:var(--text2)}
+
+.qualit-block{margin-top:.5rem;padding:.5rem .625rem;background:var(--green-dim);border-radius:var(--radius);border-left:2px solid var(--green)}
+.qualit-label{font-size:9px;color:var(--green);font-weight:500;margin-bottom:2px;text-transform:uppercase;letter-spacing:.05em}
+.add-qualit{font-size:10px;color:var(--text3);cursor:pointer;display:inline-block;margin-top:.25rem}
+.add-qualit:hover{color:var(--green)}
+
+.resp-block{margin-top:.5rem;padding:.5rem .625rem;background:var(--bg2);border-radius:var(--radius);border:0.5px solid var(--border)}
+.resp-label{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.375rem}
+.resp-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.rf-label{font-size:9px;color:var(--text3);margin-bottom:1px}
+.resp-input{font-size:11px;padding:4px 7px;border-radius:4px;border:0.5px solid var(--border2);background:var(--bg3);color:var(--text);font-family:'DM Sans',sans-serif;width:100%}
+.resp-input:focus{outline:none;border-color:var(--green)}
+.resp-input::placeholder{color:var(--text3)}
+
+.add-kr{font-size:10px;padding:5px;border-radius:var(--radius);border:0.5px dashed var(--border2);color:var(--text3);cursor:pointer;text-align:center;margin-top:.25rem;transition:all .12s}
+.add-kr:hover{color:var(--green);border-color:var(--green)}
+.add-obj{font-size:11px;padding:7px;border-radius:var(--radius);border:0.5px dashed var(--border2);color:var(--text3);cursor:pointer;text-align:center;transition:all .12s}
+.add-obj:hover{color:var(--text2);border-color:var(--border2)}
+.add-sub{font-size:10px;color:var(--text3);cursor:pointer;padding:6px 10px;text-align:center;border-top:0.5px dashed var(--border);margin-top:4px}
+.add-sub:hover{color:var(--text2)}
+
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;height:220px;gap:8px;color:var(--text3);text-align:center}
+.empty-state b{font-size:13px;color:var(--text2);font-weight:500}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:16px;right:16px;font-size:11px;padding:7px 14px;border-radius:var(--radius);background:var(--green-dim);color:var(--green);border:0.5px solid var(--green);opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;font-family:'DM Sans',sans-serif}
+.toast.show{opacity:1}
+
+/* ── LOADING ── */
+.loading{display:flex;align-items:center;justify-content:center;height:100vh;color:var(--text3);font-size:13px;flex-direction:column;gap:8px}
+.spinner{width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--green);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<!-- CONFIG — altere aqui -->
+<script>
+// ── CONFIGURAÇÃO ──────────────────────────────────────────────────────────────
+// 1. Crie uma conta em supabase.com
+// 2. Crie um projeto e uma tabela chamada "planejamento" com colunas:
+//    id (text, primary key), data (jsonb), updated_at (timestamp)
+// 3. Cole suas credenciais abaixo:
+const SUPABASE_URL  = "https://syrepfdgewnspjmninjv.supabase.co";
+const SUPABASE_KEY  = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN5cmVwZmRnZXduc3BqbW5pbmp2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc2ODEwNzQsImV4cCI6MjA5MzI1NzA3NH0.-WwyyWnnHxrqwGBm9wlkza67poDW54Da88jGJ9GSLr8";
+const APP_PASSWORD  = "jds2025";   // ← altere a senha aqui
+const DATA_KEY      = "planejamento_jds_2025";
+// ─────────────────────────────────────────────────────────────────────────────
+</script>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-logo">Grupo <span>Jardim da Saudade</span><br><small style="font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text3);font-weight:300">Planejamento Estratégico 2025</small></div>
+  <div class="login-box">
+    <div>
+      <div class="login-label">Senha de acesso</div>
+      <input class="login-input" type="password" id="pwInput" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-err" id="loginErr">Senha incorreta</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="topbar">
+    <div class="topbar-brand">Grupo <span>Jardim da Saudade</span></div>
+    <div class="topbar-right">
+      <span class="topbar-path" id="topPath"></span>
+      <button class="save-btn" onclick="persist()">Salvar</button>
+      <button class="logout-btn" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+  <div class="workspace">
+    <div class="col">
+      <div class="col-hd">Unidades de negócio</div>
+      <div class="col-body" id="listUN"></div>
+    </div>
+    <div class="col">
+      <div class="col-hd">Sub-áreas</div>
+      <div class="col-body" id="listSA"></div>
+    </div>
+    <div class="col" style="border-right:none">
+      <div class="col-hd" id="panelHd">Selecione uma sub-área</div>
+      <div class="panel" id="panel"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── TAXONOMIA ─────────────────────────────────────────────────────────────────
+const SUBAREAS=[
+  {id:"comercial",   label:"Comercial / Vendas",       subs:["B2B","Canal Digital","Canal PAP","Pós-venda / Customer Success","Pré-venda / Inside Sales"]},
+  {id:"comunicacao", label:"Comunicação e Marketing",  subs:["Comunicação Institucional","Inbound / CRM","Marketing de Conteúdo","Marketing Digital / Performance","Mídia e Relações Públicas"]},
+  {id:"dp",          label:"Departamento Pessoal",     subs:["Admissão e Demissão","Benefícios","Folha de Pagamento","Ponto e Jornada"]},
+  {id:"esg",         label:"ESG e Sustentabilidade",   subs:["Governança","Meio Ambiente","Responsabilidade Social"]},
+  {id:"financeiro",  label:"Financeiro",               subs:["Cobrança","Contas a Pagar","Contas a Receber","Controladoria","Tesouraria","Tributário / Fiscal"]},
+  {id:"inovacao",    label:"Inovação",                 subs:["Novos Negócios","P&D","Transformação Digital"]},
+  {id:"juridico",    label:"Jurídico e Compliance",    subs:["Compliance / LGPD","Contencioso","Contratos","Trabalhista"]},
+  {id:"operacoes",   label:"Operações",                subs:["Facilities","Logística / Frotas","Manutenção","Qualidade","Segurança do Trabalho"]},
+  {id:"rh",          label:"RH e Gestão de Pessoas",   subs:["Clima e Engajamento","Cultura","Recrutamento e Seleção","Remuneração e Benefícios","Treinamento e Desenvolvimento"]},
+  {id:"ti",          label:"TI e Tecnologia",          subs:["Dados e Analytics","Infraestrutura","Segurança da Informação","Sistemas / ERP","Suporte"]},
+];
+
+const UNS=[
+  {id:"crematorio",     label:"Crematório"},
+  {id:"florista_pac",   label:"Florista — Paciência"},
+  {id:"florista_pv",    label:"Florista — Porto Velho"},
+  {id:"florista_sul",   label:"Florista — Sulacap"},
+  {id:"funeraria",      label:"Funerária"},
+  {id:"holding",        label:"Holding"},
+  {id:"lanchonete_pac", label:"Lanchonete — Paciência"},
+  {id:"lanchonete_pv",  label:"Lanchonete — Porto Velho"},
+  {id:"lanchonete_sul", label:"Lanchonete — Sulacap"},
+  {id:"paciencia",      label:"Paciência"},
+  {id:"plamor",         label:"PLAMOR"},
+  {id:"portovelho",     label:"Porto Velho"},
+  {id:"sulacap",        label:"Sulacap"},
+];
+
+// ── DADOS PRÉ-CARREGADOS ──────────────────────────────────────────────────────
+function mkResp(cargo,depto){return{nome:"",cargo,depto,tel:"",email:""};}
+function mkInd(n,f){return{n,f};}
+function mkKR(kr,kpi,meta,freq,inds,qualit,cargo,depto){
+  return{id:uid(),kr,kpi,meta,freq,inds,qualit,resp:mkResp(cargo,depto)};
+}
+function mkObj(obj,krs){return{id:uid(),obj,krs};}
+
+const SEED={
+  plamor:{
+    comercial:{
+      "Canal PAP":{objetivos:[
+        mkObj("Atingir 800 vendas confirmadas/mês via PAP com CAC decrescente",[
+          mkKR("800 vendas confirmadas/mês até dez/2025","Vendas confirmadas PAP/mês","800/mês","Semanal",
+            [mkInd("Assinaturas realizadas/mês",  "Semanal"),
+             mkInd("Taxa de confirmação — assinatura → 5 meses (%)", "Mensal"),
+             mkInd("Produtividade/vendedor — confirmações/mês","Semanal"),
+             mkInd("Desistências entre assinatura e confirmação — motivo principal","Mensal"),
+             mkInd("CAC PAP — custo total / confirmações (R$)","Mensal")],
+            "CSAT pós-confirmação — Meta: ≥ 80. Aplicar ao cliente que completou 5 meses. Identifica se o onboarding cria ou destrói valor percebido.",
+            "Gerente Comercial PAP","Comercial · PAP · PLAMOR"),
+        ])
+      ]},
+      "Canal Digital":{objetivos:[
+        mkObj("Gerar 1.500 leads qualificados/mês e converter com CAC < R$200",[
+          mkKR("1.500 MQLs/mês até jun/2025 — 2.000 até dez/2025","Leads qualificados/mês — MQL PLAMOR","1.500/mês → 2.000/mês","Semanal",
+            [mkInd("CPL por canal — Meta · Google · TikTok (R$)","Semanal"),
+             mkInd("Taxa de conversão lead → assinatura (%)","Mensal"),
+             mkInd("Taxa de conversão assinatura → confirmação (%)","Mensal"),
+             mkInd("ROAS por campanha","Semanal"),
+             mkInd("CAC Digital — investimento + operação / confirmações (R$)","Mensal")],
+            null,"Coordenador de Marketing Digital","Marketing Digital · PLAMOR"),
+        ])
+      ]},
+      "B2B":{objetivos:[
+        mkObj("Fechar 8 acordos B2B ativos gerando acesso a 3.000 colaboradores",[
+          mkKR("8 acordos ativos / 3.000 colaboradores com acesso ao plano","Acordos B2B ativos / colaboradores com acesso","8 acordos / 3.000 colaboradores","Mensal",
+            [mkInd("Acordos B2B assinados/mês","Mensal"),
+             mkInd("Colaboradores com acesso ao plano por empresa","Mensal"),
+             mkInd("Taxa de conversão colaborador → contrato ativo (%)","Mensal"),
+             mkInd("Receita originada via B2B / receita total (%)","Trimestral")],
+            null,"Executivo de Contas B2B","Comercial · B2B · PLAMOR"),
+        ])
+      ]},
+    },
+    financeiro:{
+      "Contas a Receber":{objetivos:[
+        mkObj("Manter churn mensal total abaixo de 2,5% e maximizar LTV",[
+          mkKR("Churn mensal < 2,5%","Churn mensal (%)","< 2,5%","Mensal",
+            [mkInd("Cancelamentos voluntários/mês","Mensal"),
+             mkInd("Cancelamentos por inadimplência/mês","Mensal"),
+             mkInd("Churn coorte 36 meses — análise separada","Mensal"),
+             mkInd("Taxa de reativação de cancelados em 30 dias (%)","Mensal"),
+             mkInd("LTV médio por contrato (R$)","Trimestral")],
+            "NPS base ativa — semestral, segmentado: 0-12m / 13-36m / +36m. Meta: ≥ 55. Identifica onde satisfação cai antes do churn.",
+            "Coordenador de Retenção","Retenção · PLAMOR"),
+          mkKR("Taxa de permanência após 36 meses — baseline Q1 + 5pp/trimestre","Taxa de permanência após 36 meses (%)","Baseline Q1 + 5pp/trimestre","Mensal",
+            [mkInd("Contratos na faixa 30-36 meses — volume","Mensal"),
+             mkInd("Contatos de retenção proativos realizados nessa faixa","Mensal"),
+             mkInd("Taxa de conversão da ação de retenção — permaneceram (%)","Mensal"),
+             mkInd("Principal motivo de cancelamento na faixa 36 meses","Mensal")],
+            null,"Coordenador de Retenção","Retenção · Financeiro · PLAMOR"),
+        ])
+      ]},
+    },
+  },
+  funeraria:{
+    operacoes:{
+      "Logística / Frotas":{objetivos:[
+        mkObj("Garantir excelência operacional com tempo de resposta máximo de 2h",[
+          mkKR("≤ 2h para 95% dos acionamentos","Tempo médio de resposta ao acionamento (horas)","≤ 2h para ≥ 95% dos casos","Semanal",
+            [mkInd("Tempo acionamento → primeiro contato com a família","Por evento"),
+             mkInd("Tempo primeiro contato → início do atendimento presencial","Por evento"),
+             mkInd("% de atendimentos fora do prazo de 2h","Mensal"),
+             mkInd("Disponibilidade da frota — veículos prontos / total (%)","Diário"),
+             mkInd("Custo operacional médio por atendimento (R$)","Mensal")],
+            "CES — facilidade do processo no momento do óbito. Meta: ≥ 6 (escala 1-7). A família está em colapso. Processo difícil é trauma adicional.",
+            "Gerente Operacional","Operações · Funerária"),
+        ])
+      ]},
+      "Qualidade":{objetivos:[
+        mkObj("Atingir NPS de atendimento de sinistro PLAMOR acima de 80",[
+          mkKR("NPS sinistro PLAMOR ≥ 80","NPS atendimento sinistro PLAMOR","≥ 80","Mensal",
+            [mkInd("NPS por atendente — identificar variação de qualidade","Mensal"),
+             mkInd("Principais drivers de detratores — análise qualitativa","Mensal"),
+             mkInd("Taxa de reclamações formais / total atendimentos (%)","Mensal"),
+             mkInd("% de atendimentos com protocolo seguido integralmente","Mensal")],
+            "CSAT pós-atendimento geral — 7 dias após. Meta: ≥ 88. Mede satisfação com a entrega independente do canal de origem.",
+            "Coordenador de Atendimento","Atendimento · Qualidade · Funerária"),
+        ])
+      ]},
+    },
+  },
+  paciencia:{
+    comercial:{
+      "Pós-venda / Customer Success":{objetivos:[
+        mkObj("Maximizar conversão aluguel → jazigo financiado e renovação",[
+          mkKR("40 jazigos financiados vendidos/mês até dez/2025","Jazigos financiados vendidos/mês","40/mês","Mensal",
+            [mkInd("Atendimentos de óbito/mês — total","Mensal"),
+             mkInd("Decisões por jazigo financiado (%)","Mensal"),
+             mkInd("Decisões por aluguel 3 anos (%)","Mensal"),
+             mkInd("Decisões por cremação (%)","Mensal"),
+             mkInd("Ticket médio do financiamento (R$)","Mensal")],
+            "CES — facilidade do processo de compra no momento do óbito. Meta: ≥ 6 (escala 1-7).",
+            "Gerente Comercial","Comercial · Paciência"),
+          mkKR("Taxa de renovação de aluguel no vencimento > 60%","Taxa de renovação de aluguel no vencimento (%)","≥ 60%","Trimestral",
+            [mkInd("Contratos de aluguel com vencimento no período","Mensal"),
+             mkInd("Renovações realizadas / total com vencimento (%)","Mensal"),
+             mkInd("Conversões aluguel → jazigo no momento da renovação (%)","Trimestral"),
+             mkInd("Receita de renovações/mês (R$)","Mensal")],
+            "NPS sinistro PLAMOR em Paciência — 15 dias após o sepultamento. Meta: ≥ 75.",
+            "Gerente Operacional","Operações · Paciência"),
+        ])
+      ]},
+    },
+    financeiro:{
+      "Cobrança":{objetivos:[
+        mkObj("Manter inadimplência da carteira de financiamento abaixo de 10%",[
+          mkKR("Inadimplência < 10%","Inadimplência carteira de financiamento Paciência (%)","< 10%","Mensal",
+            [mkInd("Parcelas em atraso >30 dias / carteira ativa (%)","Mensal"),
+             mkInd("Parcelas em atraso >90 dias — risco de perda (%)","Mensal"),
+             mkInd("Renegociações realizadas/mês","Mensal"),
+             mkInd("Taxa de retomada de jazigo por inadimplência (%)","Trimestral")],
+            null,"Gerente de Cobrança","Cobrança · Financeiro"),
+        ])
+      ]},
+    },
+  },
+  sulacap:{
+    comercial:{
+      "Pós-venda / Customer Success":{objetivos:[
+        mkObj("Maximizar ticket médio por atendimento via upsell de serviços",[
+          mkKR("Ticket médio cresce 25% até dez/2025","Ticket médio por atendimento — Sulacap (R$)","Crescimento de 25% sobre baseline Q1","Mensal",
+            [mkInd("Adesão a capelas nível 3 (premium) — % dos atendimentos","Mensal"),
+             mkInd("Receita média de lápides por atendimento (R$)","Mensal"),
+             mkInd("Receita média de floricultura por atendimento (R$)","Mensal"),
+             mkInd("Taxa de adesão a serviços de conservação perpétua (%)","Trimestral"),
+             mkInd("Receita total de serviços adicionais/mês (R$)","Mensal")],
+            "CSAT pós-cerimônia — 7 dias após. Meta: ≥ 90. Público A/B tem expectativa proporcional ao preço pago.",
+            "Gerente Comercial Sulacap","Comercial · Sulacap"),
+        ])
+      ]},
+    },
+    operacoes:{
+      "Qualidade":{objetivos:[
+        mkObj("Consolidar Sulacap como referência de experiência no setor funerário do Rio",[
+          mkKR("NPS consolidado Sulacap ≥ 80 até dez/2025","NPS consolidado — Sulacap","≥ 80","Trimestral",
+            [mkInd("NPS atendimento de óbito","Mensal"),
+             mkInd("NPS cerimônia de cremação","Mensal"),
+             mkInd("Avaliação média Google — Sulacap (estrelas)","Mensal"),
+             mkInd("Volume de avaliações novas/mês","Mensal"),
+             mkInd("Taxa de resposta a reclamações em até 24h (%)","Mensal")],
+            null,"Gerente Geral Sulacap","Diretoria Operacional · Sulacap"),
+        ])
+      ]},
+    },
+  },
+  holding:{
+    financeiro:{
+      "Controladoria":{objetivos:[
+        mkObj("Fortalecer saúde financeira consolidada e institucionalizar DRE gerencial por UN",[
+          mkKR("EBITDA consolidado — baseline Q1 + crescimento trimestral","EBITDA consolidado (R$)","Baseline Q1 + crescimento trimestral","Mensal",
+            [mkInd("Receita bruta total/mês","Mensal"),
+             mkInd("Deduções e impostos sobre receita","Mensal"),
+             mkInd("Custos operacionais consolidados por UN","Mensal"),
+             mkInd("Despesas administrativas da Holding","Mensal"),
+             mkInd("Resultado antes de juros e depreciação","Mensal")],
+            null,"CFO / Diretor Financeiro","Financeiro · Controladoria · Holding"),
+          mkKR("DRE gerencial por UN publicado até dia 10 de cada mês","Prazo de fechamento contábil (dias após mês)","≤ 10 dias","Mensal",
+            [mkInd("Data de fechamento por UN","Mensal"),
+             mkInd("Número de reprocessamentos necessários","Mensal"),
+             mkInd("% de lançamentos sem conciliação","Mensal")],
+            null,"Controller","Controladoria · Holding"),
+        ])
+      ]},
+      "Cobrança":{objetivos:[
+        mkObj("Reduzir inadimplência consolidada para abaixo de 8%",[
+          mkKR("Inadimplência consolidada < 8%","Taxa de inadimplência consolidada (%)","< 8%","Mensal",
+            [mkInd("Parcelas em atraso >30 dias / carteira total (%)","Mensal"),
+             mkInd("Parcelas em atraso >90 dias / carteira total (%)","Mensal"),
+             mkInd("Volume de renegociações realizadas/mês","Mensal"),
+             mkInd("Taxa de recuperação pós-negativação (%)","Trimestral")],
+            null,"Gerente de Cobrança","Cobrança · Financeiro · Holding"),
+        ])
+      ]},
+    },
+    rh:{
+      "Recrutamento e Seleção":{objetivos:[
+        mkObj("Preencher 100% das vagas críticas em até 20 dias úteis",[
+          mkKR("Tempo médio de preenchimento ≤ 20 dias úteis","Tempo médio de preenchimento de vagas críticas (dias úteis)","≤ 20 dias","Mensal",
+            [mkInd("Tempo médio abertura → oferta aceita (dias)","Mensal"),
+             mkInd("Taxa de aprovação no período de experiência (%)","Trimestral"),
+             mkInd("% de vagas críticas abertas há mais de 30 dias","Mensal")],
+            null,"Coordenador de R&S","RH · Recrutamento & Seleção · Holding"),
+        ])
+      ]},
+      "Clima e Engajamento":{objetivos:[
+        mkObj("Reduzir turnover voluntário para abaixo de 12% ao ano",[
+          mkKR("Turnover voluntário < 12% ao ano","Turnover voluntário anualizado (%)","< 12%","Bimestral",
+            [mkInd("Demissões voluntárias/mês por UN","Mensal"),
+             mkInd("Tempo médio de permanência na empresa (meses)","Trimestral"),
+             mkInd("Principais motivos de desligamento — exit interview","Mensal"),
+             mkInd("Turnover em cargos críticos — liderança / atendimento / PAP","Trimestral")],
+            "eNPS — índice de promotores internos. Aplicar semestralmente. Meta: ≥ 30. Mede se o colaborador recomendaria a empresa como lugar para trabalhar.",
+            "Gerente de RH","RH · Gestão de Pessoas · Holding"),
+        ])
+      ]},
+    },
+    inovacao:{
+      "Novos Negócios":{objetivos:[
+        mkObj("Lançar piloto de crematório pet como nova fonte de receita",[
+          mkKR("Piloto operacional em set/2025","Status de implantação do piloto (marco)","Piloto operacional em set/2025","Mensal",
+            [mkInd("Marco 1 — estudo de viabilidade concluído","Único"),
+             mkInd("Marco 2 — licenças e regulatório mapeados","Único"),
+             mkInd("Marco 3 — espaço físico definido em Sulacap","Único"),
+             mkInd("Marco 4 — piloto operacional com 1º atendimento","Único")],
+            null,"CEO / Diretora de Inovação","Inovação · Holding"),
+        ])
+      ]},
+    },
+  },
+};
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function uid(){return"id_"+Math.random().toString(36).slice(2,10);}
+function toast(msg,err){
+  const t=document.getElementById("toast");
+  t.textContent=msg;
+  t.style.background=err?"#3d1515":undefined;
+  t.style.color=err?"var(--danger)":undefined;
+  t.style.borderColor=err?"var(--danger)":undefined;
+  t.className="toast show";
+  setTimeout(()=>t.className="toast",2500);
+}
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let db=null;
+let appData={};
+let sel={un:null,sa:null,sub:null};
+let openMap={};
+
+function ensurePath(un,sa,sub){
+  if(!appData[un])appData[un]={};
+  if(!appData[un][sa])appData[un][sa]={};
+  if(!appData[un][sa][sub])appData[un][sa][sub]={objetivos:[]};
+  return appData[un][sa][sub];
+}
+function getPath(){return sel.un&&sel.sa&&sel.sub?appData[sel.un]?.[sel.sa]?.[sel.sub]:null:null;}
+function hasData(un,sa,sub){try{const p=appData[un]?.[sa]?.[sub];return p&&p.objetivos&&p.objetivos.length>0;}catch{return false;}}
+function hasAnySA(un,sa){return SUBAREAS.find(s=>s.id===sa)?.subs.some(s=>hasData(un,sa,s));}
+function hasAnyUN(un){return SUBAREAS.some(s=>hasAnySA(un,s.id));}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────────
+function doLogin(){
+  const pw=document.getElementById("pwInput").value;
+  if(pw!==APP_PASSWORD){document.getElementById("loginErr").style.display="block";return;}
+  document.getElementById("loginScreen").style.display="none";
+  document.getElementById("app").style.display="flex";
+  initApp();
+}
+function doLogout(){
+  document.getElementById("app").style.display="none";
+  document.getElementById("loginScreen").style.display="flex";
+  document.getElementById("pwInput").value="";
+}
+
+// ── SUPABASE ──────────────────────────────────────────────────────────────────
+async function initApp(){
+  // Se Supabase não configurado, usa seed local
+  if(SUPABASE_URL==="COLE_SUA_URL_SUPABASE_AQUI"){
+    appData=JSON.parse(JSON.stringify(SEED));
+    toast("Modo offline — configure o Supabase para persistência em nuvem");
+    sel.un=UNS[5].id;
+    render();
+    return;
+  }
+  try{
+    db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    const{data,error}=await db.from("planejamento").select("data").eq("id",DATA_KEY).single();
+    if(error&&error.code==="PGRST116"){
+      // Primeiro acesso — sobe o seed
+      appData=JSON.parse(JSON.stringify(SEED));
+      await db.from("planejamento").insert({id:DATA_KEY,data:appData,updated_at:new Date().toISOString()});
+    } else if(data){
+      appData=data.data;
+    }
+    toast("Dados carregados ✓");
+  }catch(e){
+    appData=JSON.parse(JSON.stringify(SEED));
+    toast("Erro ao conectar — modo offline",true);
+  }
+  sel.un=UNS[5].id;
+  render();
+}
+
+async function persist(){
+  if(SUPABASE_URL==="COLE_SUA_URL_SUPABASE_AQUI"){toast("Configure o Supabase para salvar em nuvem",true);return;}
+  try{
+    await db.from("planejamento").upsert({id:DATA_KEY,data:appData,updated_at:new Date().toISOString()});
+    toast("Salvo com sucesso ✓");
+  }catch(e){toast("Erro ao salvar",true);}
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function render(){renderUN();renderSA();renderPanel();}
+
+function renderUN(){
+  document.getElementById("listUN").innerHTML=
+    UNS.map(u=>`<div class="si${sel.un===u.id?" active":""}" onclick="selUN('${u.id}')">
+      <span>${u.label}</span>${hasAnyUN(u.id)?'<span class="dot"></span>':""}
+    </div>`).join("");
+}
+
+function renderSA(){
+  if(!sel.un){document.getElementById("listSA").innerHTML="";return;}
+  document.getElementById("listSA").innerHTML=
+    SUBAREAS.map(sa=>`<div class="si${sel.sa===sa.id?" active":""}" onclick="selSA('${sa.id}')">
+      <span>${sa.label}</span>${hasAnySA(sel.un,sa.id)?'<span class="dot"></span>':""}
+    </div>`).join("");
+}
+
+function renderPanel(){
+  const panel=document.getElementById("panel");
+  const hd=document.getElementById("panelHd");
+  const un=UNS.find(u=>u.id===sel.un);
+  const sa=SUBAREAS.find(s=>s.id===sel.sa);
+
+  if(!sel.un||!sel.sa){
+    hd.textContent=sel.un?(un?.label+" — escolha uma sub-área"):"Selecione uma unidade";
+    panel.innerHTML=`<div class="empty-state"><b>${sel.un?"Selecione uma sub-área":"Selecione uma unidade de negócio"}</b></div>`;
+    document.getElementById("topPath").textContent="";
+    return;
+  }
+
+  if(!sel.sub){
+    hd.textContent=sa?.label||"";
+    document.getElementById("topPath").textContent=(un?.label||"")+" › "+(sa?.label||"");
+    const subs=[...(sa?.subs||[]),...extraSubs(sel.un,sel.sa)];
+    panel.innerHTML=`<div style="padding:.5rem 0"><div class="sub-grid">
+      ${subs.map(s=>`<div class="sub-card${sel.sub===s?" active":""}" onclick="selSub('${s.replace(/'/g,"\\'")}')">
+        <span>${s}</span>${hasData(sel.un,sel.sa,s)?'<span class="dot"></span>':""}
+      </div>`).join("")}
+      <div class="add-sub" onclick="addSubdiv()">+ subdivisão</div>
+    </div></div>`;
+    return;
+  }
+
+  const path=(un?.label||"")+" › "+(sa?.label||"")+" › "+sel.sub;
+  hd.textContent=sel.sub;
+  document.getElementById("topPath").textContent=path;
+  const node=ensurePath(sel.un,sel.sa,sel.sub);
+
+  panel.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.875rem">
+      <div>
+        <div style="font-size:13px;font-weight:500;color:var(--text)">${sel.sub}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:1px">${sa?.label} · ${un?.label}</div>
+      </div>
+      <button class="save-btn" style="font-size:10px;padding:4px 10px" onclick="addObjetivo()">+ Objetivo</button>
+    </div>
+    <div class="okr-list" id="okrList">
+      ${node.objetivos.length===0?`<div class="empty-state"><b>Sem objetivos ainda</b><span>Clique em "+ Objetivo" para começar</span></div>`:""}
+      ${node.objetivos.map((o,i)=>renderObj(o,i)).join("")}
+    </div>
+    <div class="add-obj" style="margin-top:.5rem" onclick="addObjetivo()">+ Adicionar objetivo</div>`;
+}
+
+function renderObj(o,oi){
+  const open=openMap[o.id]!==false;
+  return`<div class="okr-card" id="oc_${o.id}">
+    <div class="okr-head" onclick="toggleObj('${o.id}')">
+      <div style="flex:1;min-width:0">
+        <div class="okr-badge">Objetivo ${oi+1}</div>
+        <div class="okr-obj"><div class="ed bold" contenteditable="true"
+          onblur="saveObjF('${o.id}','obj',this.innerText)"
+          onclick="event.stopPropagation()">${o.obj}</div></div>
+      </div>
+      <div style="display:flex;gap:3px;align-items:center;flex-shrink:0">
+        <button class="icon-btn" onclick="event.stopPropagation();deleteObj('${o.id}')">✕</button>
+        <div class="chev${open?" open":""}" id="chev_${o.id}">▾</div>
+      </div>
+    </div>
+    <div id="krb_${o.id}" style="display:${open?"flex":"none"};flex-direction:column;gap:.75rem;padding:.75rem .875rem;background:var(--bg)">
+      ${o.krs.map((kr,ki)=>renderKR(kr,ki,o.id)).join("")}
+      <div class="add-kr" onclick="addKR('${o.id}')">+ Key Result</div>
+    </div>
+  </div>`;
+}
+
+function renderKR(kr,ki,oid){
+  return`<div class="kr-item" id="kr_${kr.id}">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:6px;margin-bottom:.375rem">
+      <div style="flex:1;min-width:0">
+        <div class="kr-badge">Key Result ${ki+1}</div>
+        <div class="ed bold" contenteditable="true" onblur="saveKRF('${kr.id}','kr',this.innerText)">${kr.kr}</div>
+      </div>
+      <button class="icon-btn" onclick="deleteKR('${oid}','${kr.id}')">✕</button>
+    </div>
+    <div class="kr-grid">
+      <div><div class="kf-label">KPI</div><div class="ed sm" contenteditable="true" onblur="saveKRF('${kr.id}','kpi',this.innerText)">${kr.kpi}</div></div>
+      <div><div class="kf-label">Meta 2025</div><div class="ed sm" contenteditable="true" onblur="saveKRF('${kr.id}','meta',this.innerText)">${kr.meta}</div></div>
+      <div><div class="kf-label">Periodicidade</div><div class="ed sm" contenteditable="true" onblur="saveKRF('${kr.id}','freq',this.innerText)">${kr.freq}</div></div>
+    </div>
+    <div class="inds-label">Indicadores primários</div>
+    <div id="inds_${kr.id}">
+      ${kr.inds.map((ind,ii)=>`<div class="ind-row">
+        <div class="ed sm" contenteditable="true" onblur="saveInd('${kr.id}',${ii},'n',this.innerText)">${ind.n}</div>
+        <div class="ed sm" contenteditable="true" style="text-align:right" onblur="saveInd('${kr.id}',${ii},'f',this.innerText)">${ind.f}</div>
+        <div class="ind-del" onclick="deleteInd('${kr.id}',${ii})">✕</div>
+      </div>`).join("")}
+    </div>
+    <div class="add-ind" onclick="addInd('${kr.id}')">+ indicador</div>
+    ${kr.qualit!==null&&kr.qualit!==undefined
+      ?`<div class="qualit-block"><div class="qualit-label">Indicador qualitativo — NPS · CSAT · CES</div>
+         <div class="ed sm" contenteditable="true" onblur="saveKRF('${kr.id}','qualit',this.innerText)">${kr.qualit||"Descreva o indicador..."}</div></div>`
+      :`<div class="add-qualit" onclick="addQualit('${kr.id}')">+ indicador qualitativo (NPS · CSAT · CES)</div>`}
+    <div class="resp-block">
+      <div class="resp-label">Responsável</div>
+      <div class="resp-grid">
+        <div><div class="rf-label">Nome</div><input class="resp-input" placeholder="Nome completo" value="${kr.resp.nome}" onchange="saveResp('${kr.id}','nome',this.value)"></div>
+        <div><div class="rf-label">Cargo</div><input class="resp-input" placeholder="Cargo" value="${kr.resp.cargo}" onchange="saveResp('${kr.id}','cargo',this.value)"></div>
+        <div><div class="rf-label">Departamento</div><input class="resp-input" placeholder="Departamento" value="${kr.resp.depto}" onchange="saveResp('${kr.id}','depto',this.value)"></div>
+        <div><div class="rf-label">Telefone</div><input class="resp-input" placeholder="(21) 9xxxx-xxxx" value="${kr.resp.tel}" onchange="saveResp('${kr.id}','tel',this.value)"></div>
+        <div style="grid-column:1/-1"><div class="rf-label">E-mail</div><input class="resp-input" placeholder="nome@jardimdasaudade.com.br" value="${kr.resp.email}" onchange="saveResp('${kr.id}','email',this.value)"></div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── NAVIGATION ────────────────────────────────────────────────────────────────
+function selUN(id){sel={un:id,sa:null,sub:null};render();}
+function selSA(id){sel.sa=id;sel.sub=null;render();}
+function selSub(s){sel.sub=s;render();}
+function extraSubs(un,sa){
+  const base=SUBAREAS.find(s=>s.id===sa)?.subs||[];
+  return Object.keys(appData[un]?.[sa]||{}).filter(k=>!base.includes(k));
+}
+function addSubdiv(){
+  const n=prompt("Nome da nova subdivisão:");
+  if(!n?.trim())return;
+  const sa=SUBAREAS.find(s=>s.id===sel.sa);
+  if(sa&&!sa.subs.includes(n.trim()))sa.subs.push(n.trim());
+  sel.sub=n.trim();
+  render();
+}
+
+// ── OKR CRUD ──────────────────────────────────────────────────────────────────
+function addObjetivo(){
+  if(!sel.un||!sel.sa||!sel.sub)return;
+  const node=ensurePath(sel.un,sel.sa,sel.sub);
+  const oid=uid();
+  node.objetivos.push({id:oid,obj:"Novo objetivo estratégico",
+    krs:[{id:uid(),kr:"Key Result 1",kpi:"KPI principal",meta:"Meta 2025",freq:"Mensal",
+      inds:[{n:"Indicador 1",f:"Mensal"},{n:"Indicador 2",f:"Mensal"},{n:"Indicador 3",f:"Mensal"}],
+      qualit:null,resp:{nome:"",cargo:"",depto:"",tel:"",email:""}}]});
+  openMap[oid]=true;
+  renderPanel();
+}
+
+function deleteObj(oid){
+  const node=getPath();if(!node)return;
+  if(!confirm("Remover este objetivo?"))return;
+  node.objetivos=node.objetivos.filter(o=>o.id!==oid);
+  renderPanel();
+}
+
+function toggleObj(oid){
+  openMap[oid]=openMap[oid]===false?true:false;
+  const b=document.getElementById("krb_"+oid);
+  const c=document.getElementById("chev_"+oid);
+  if(b)b.style.display=openMap[oid]===false?"none":"flex";
+  if(c)c.className="chev"+(openMap[oid]===false?"":" open");
+}
+
+function findKR(krid){
+  for(const un of Object.values(appData))
+    for(const sa of Object.values(un))
+      for(const sub of Object.values(sa))
+        for(const o of(sub.objetivos||[]))
+          for(const kr of(o.krs||[]))
+            if(kr.id===krid)return kr;
+  return null;
+}
+
+function saveObjF(oid,field,val){
+  const node=getPath();if(!node)return;
+  const o=node.objetivos.find(o=>o.id===oid);
+  if(o)o[field]=val.trim();
+}
+function saveKRF(krid,field,val){const kr=findKR(krid);if(kr)kr[field]=val.trim();}
+function saveInd(krid,idx,field,val){const kr=findKR(krid);if(kr&&kr.inds[idx])kr.inds[idx][field]=val.trim();}
+function saveResp(krid,field,val){const kr=findKR(krid);if(kr)kr.resp[field]=val;}
+
+function addInd(krid){
+  const kr=findKR(krid);if(!kr)return;
+  kr.inds.push({n:"Novo indicador",f:"Mensal"});
+  renderPanel();
+}
+function deleteInd(krid,idx){
+  const kr=findKR(krid);if(!kr)return;
+  kr.inds.splice(idx,1);
+  renderPanel();
+}
+function addKR(oid){
+  const node=getPath();if(!node)return;
+  const o=node.objetivos.find(o=>o.id===oid);
+  if(!o)return;
+  o.krs.push({id:uid(),kr:"Novo Key Result",kpi:"KPI",meta:"Meta",freq:"Mensal",
+    inds:[{n:"Indicador 1",f:"Mensal"},{n:"Indicador 2",f:"Mensal"},{n:"Indicador 3",f:"Mensal"}],
+    qualit:null,resp:{nome:"",cargo:"",depto:"",tel:"",email:""}});
+  renderPanel();
+}
+function deleteKR(oid,krid){
+  const node=getPath();if(!node)return;
+  const o=node.objetivos.find(o=>o.id===oid);
+  if(o)o.krs=o.krs.filter(k=>k.id!==krid);
+  renderPanel();
+}
+function addQualit(krid){
+  const kr=findKR(krid);if(!kr)return;
+  kr.qualit="";
+  renderPanel();
+}
+</script>
+</body>
+</html>
